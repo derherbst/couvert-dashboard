@@ -1,32 +1,45 @@
 # couvert-dashboard
 
-Owner-facing dashboard for Couvert, a restaurant booking platform.
+Owner-facing dashboard for Couvert, a restaurant booking platform. One restaurant per session, read-only with inline status mutations on upcoming bookings.
 
-See `CLAUDE.md` for stack, hard rules, glossary, data-quality notes, and scope.
+Built with **Next.js 16 (App Router)**, **React 19**, **TypeScript** (strict), **Tailwind**. Mock API via **json-server** over `db.json`.
 
 ## Run
 
 ```bash
 npm install
-npm run dev          # Next on :3000 + json-server on :4000
-npm run build
+npm run dev      # Next on :3000  +  json-server on :4000
 ```
 
-Mock API serves `db.json` from the repo root at `http://localhost:4000`.
+| script | what |
+|---|---|
+| `dev`        | both processes in parallel |
+| `dev:next`   | Next only |
+| `dev:api`    | json-server only (`--watch db.json`) |
+| `build`      | production build |
+| `typecheck`  | `tsc --noEmit` |
+| `lint`       | `next lint` |
 
-## Data entities
+## Structure
 
-Top-level collections in `db.json`:
+```
+src/
+  app/         # routes; page.tsx is the only client component (the orchestrator)
+  components/  # presentational, all controlled by props
+  lib/
+    api.ts        # fetch wrappers for json-server
+    metrics.ts    # pure derivations (covers, channel mix, peer rows, …)
+    format.ts     # Intl-based formatters
+    types.ts      # domain types + unions
+    constants.ts  # API base, current restaurant id
+db.json        # mock data, served at :4000
+```
 
-- **cities** (6) — supported markets (Lisbon, Paris, …) with currency and timezone; reference data joined into restaurants and diners.
-- **floorSections** (4) — named areas of a dining room (terrace, main hall, etc.) that tables belong to.
-- **plans** (3) — Couvert's subscription tiers (`starter` / `growth` / `pro`) with monthly fee, per-cover fee, and feature lists that restaurants subscribe to.
-- **restaurants** (3) — the tenants of the dashboard: identity, location, capacity, plan, contact, and ratings rollups.
-- **tables** (42) — physical tables per restaurant, seat count, assigned to a floor section.
-- **members** (7) — staff users per restaurant with role, status, invite and last-login timestamps.
-- **promotions** (13) — restaurant-issued discount codes with active window, percentage off, and redemption count.
-- **diners** (751) — end-customer profiles: city, language, dietary tags, loyalty tier, lifetime visits and spend, budget band.
-- **bookings** (1,518) — reservations: restaurant, diner, table, party size, shift, status, channel, occasion, promo applied, deposit, bill total, and lifecycle timestamps (created / seated / left / cancelled).
-- **reviews** (554) — diner feedback tied to a booking: per-axis ratings (food / service / ambiance / value), tags, comment, owner reply, reported flag, source.
-- **invoices** (21) — Couvert's billing to restaurants per period: subscription fee, billable covers, no-shows excluded, totals, status.
-- **marketBenchmarks** (4) — city × cuisine peer averages (ratings, fill rate, median spend) for comparison widgets.
+## What's on the page
+
+Restaurant header · 30/90-day KPI strip (covers seated, new guests, revenue) · channel mix · vs-market peer comparison · latest invoice · upcoming bookings with inline status mutations (Mark seated / No-show / Cancel) that PATCH json-server with an optimistic UI.
+
+## See also
+
+- [`CLAUDE.md`](./CLAUDE.md) — hard rules, domain glossary, data-quality notes, scope.
+- [`WRITEUP.md`](./WRITEUP.md) — approach, architecture, AI usage.
