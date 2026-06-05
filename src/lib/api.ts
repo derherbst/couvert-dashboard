@@ -1,6 +1,8 @@
 import type {
 	Booking,
 	BookingStatus,
+	City,
+	Invoice,
 	MarketBenchmark,
 	Restaurant,
 } from "./types";
@@ -22,15 +24,30 @@ function normalizeBooking(b: Booking & { status: string }): Booking {
 	return { ...b, status: b.status.toLowerCase() as BookingStatus };
 }
 
+function hasValidReservedFor(b: { reservedFor: unknown }): boolean {
+	if (typeof b.reservedFor !== "string") return false;
+	return Number.isFinite(new Date(b.reservedFor).getTime());
+}
+
 export function getRestaurant(id: string): Promise<Restaurant> {
 	return getData<Restaurant>(`/restaurants/${id}`);
+}
+
+export function getCity(id: string): Promise<City> {
+	return getData<City>(`/cities/${id}`);
+}
+
+export function getInvoices(restaurantId: string): Promise<Invoice[]> {
+	return getData<Invoice[]>(
+		`/invoices?restaurantId=${encodeURIComponent(restaurantId)}`,
+	);
 }
 
 export async function getBookings(restaurantId: string): Promise<Booking[]> {
 	const rows = await getData<(Booking & { status: string })[]>(
 		`/bookings?restaurantId=${encodeURIComponent(restaurantId)}`,
 	);
-	return rows.map(normalizeBooking);
+	return rows.filter(hasValidReservedFor).map(normalizeBooking);
 }
 
 export function getMarketBenchmarks(): Promise<MarketBenchmark[]> {
