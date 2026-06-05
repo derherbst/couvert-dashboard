@@ -42,3 +42,19 @@ export function formatRating(n: number, decimals: number = 2): string {
 export function formatRatingDelta(d: number): string {
   return Math.abs(d).toFixed(2);
 }
+
+export function formatDateTime(
+  iso: string,
+  timezone: string = "Europe/Lisbon",
+  locale: string = DEFAULT_LOCALE,
+): string {
+  return new Intl.DateTimeFormat(locale, {
+    timeZone: timezone,
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(iso));
+}
