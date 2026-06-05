@@ -1,8 +1,6 @@
 import type {
 	Booking,
 	BookingStatus,
-	City,
-	Invoice,
 	MarketBenchmark,
 	Restaurant,
 } from "./types";
@@ -28,21 +26,11 @@ export function getRestaurant(id: string): Promise<Restaurant> {
 	return getData<Restaurant>(`/restaurants/${id}`);
 }
 
-export function getCity(id: string): Promise<City> {
-	return getData<City>(`/cities/${id}`);
-}
-
 export async function getBookings(restaurantId: string): Promise<Booking[]> {
 	const rows = await getData<(Booking & { status: string })[]>(
 		`/bookings?restaurantId=${encodeURIComponent(restaurantId)}`,
 	);
 	return rows.map(normalizeBooking);
-}
-
-export function getInvoices(restaurantId: string): Promise<Invoice[]> {
-	return getData<Invoice[]>(
-		`/invoices?restaurantId=${encodeURIComponent(restaurantId)}`,
-	);
 }
 
 export function getMarketBenchmarks(): Promise<MarketBenchmark[]> {
